@@ -12,4 +12,6 @@ app.include_router(statistics_router)
 @app.get("/")
 def home():
     return {"message": "AI Math Platform API running"}
-# backend branch update
+# Importul rutelor principale ale aplicației
+# Inițializarea aplicației FastAPI
+# Înregistrarea rutelor backend
