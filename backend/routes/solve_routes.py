@@ -1,13 +1,20 @@
+<<<<<<< HEAD
 from fastapi import APIRouter, UploadFile, File
 from pydantic import BaseModel
 import sympy as sp
 from backend.services.ocr_service import extract_text
+=======
+from fastapi import APIRouter
+from pydantic import BaseModel
+from math_engine.solver import solve_problem
+>>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f
 
 router = APIRouter()
 
 class MathProblem(BaseModel):
     exercise: str
 
+<<<<<<< HEAD
 # =========================
 # SOLVE NORMAL
 # =========================
@@ -126,3 +133,11 @@ def solve_image(file: UploadFile = File(...)):
             "result": "Nu am putut interpreta",
             "error": str(e)
         }
+=======
+@router.post("/solve")
+def solve(problem: MathProblem):
+
+    result = solve_problem(problem.exercise)
+
+    return result
+>>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f
