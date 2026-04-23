@@ -253,7 +253,7 @@ def solve_trigonometry(expr):
 
 # ==============================
 # ANALIZA FUNCTIILOR
-# ==============================
+# ============================s
 
 def analyze_function(expr):
 
