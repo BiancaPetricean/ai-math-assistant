@@ -587,36 +587,55 @@ if page == "Solver matematic":
 
         if st.button("diff(x**2)"):
             st.session_state.example = "diff(x**2)"
-    # =========================
-    # SISTEME ECUATII
-    # =========================
+# =========================
+# SISTEME ECUATII
+# =========================
 
-    st.markdown("---")
-    st.subheader("🔢 Rezolvă sistem de ecuații")
+st.markdown("---")
+st.subheader("🔢 Rezolvă sistem de ecuații")
 
-    eq1 = st.text_input("Ecuația 1 (ex: x + y = 5)")
-    eq2 = st.text_input("Ecuația 2 (ex: x - y = 1)")
+eq1 = st.text_input("Ecuația 1 (ex: x + y = 5)")
+eq2 = st.text_input("Ecuația 2 (ex: x - y = 1)")
 
-    if st.button("Rezolvă sistem"):
+if st.button("Rezolvă sistem"):
 
-        try:
+    try:
+        x, y = sp.symbols('x y')
 
-            x,y = sp.symbols('x y')
+        # 🔥 validare input
+        if "=" not in eq1 or "=" not in eq2:
+            st.error("Introdu ecuații corecte (cu =)")
+        else:
+            left1, right1 = eq1.split("=")
+            left2, right2 = eq2.split("=")
 
-            left1,right1 = eq1.split("=")
-            left2,right2 = eq2.split("=")
+            eq1_sym = sp.Eq(sp.sympify(left1), sp.sympify(right1))
+            eq2_sym = sp.Eq(sp.sympify(left2), sp.sympify(right2))
 
-            eq1_sym = sp.Eq(sp.sympify(left1),sp.sympify(right1))
-            eq2_sym = sp.Eq(sp.sympify(left2),sp.sympify(right2))
+            # 🔥 FIX INDENTARE
+            solution = sp.solve((eq1_sym, eq2_sym), (x, y))
 
-            solution = sp.solve((eq1_sym,eq2_sym),(x,y))
+            st.success("✔ Soluția sistemului:")
 
-            st.write("Soluția sistemului:",solution)
+            # 🔥 CAZ 0: fără soluții
+            if not solution:
+                st.warning("Nu există soluții")
 
-        except:
+            # 🔥 CAZ 1: dict
+            elif isinstance(solution, dict):
+                for var, val in solution.items():
+                    st.write(f"{var} = {val}")
 
-            st.error("Nu pot rezolva sistemul")
-            
+            # 🔥 CAZ 2: list
+            elif isinstance(solution, list):
+                for i, sol in enumerate(solution, 1):
+                    st.write(f"Soluția {i}:")
+                    for var, val in zip((x, y), sol):
+                        st.write(f"{var} = {val}")
+
+    except Exception as e:
+        st.error("Nu pot rezolva sistemul")
+        st.caption(str(e))
 # =========================
 # INIT SESSION STATE
 # =========================
@@ -790,7 +809,7 @@ if st.button("🔍 Procesează exercițiul"):
         # 🔥 OCR CU WHITELIST ECHILIBRAT
         raw_text = pytesseract.image_to_string(
             thresh,
-            config='--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789abcdefghijklmnopqrstuvwxyz+-=*/().√^πv'
+            config='--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789abcxyz+-=*/().∫√^πv⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹'
         )
 
        # st.write("RAW:", raw_text)
