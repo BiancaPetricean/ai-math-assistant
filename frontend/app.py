@@ -793,12 +793,12 @@ if st.button("🔍 Procesează exercițiul"):
             config='--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789abcdefghijklmnopqrstuvwxyz+-=*/().√^πv'
         )
 
-        st.write("RAW:", raw_text)
+       # st.write("RAW:", raw_text)
 
         # 🔥 CURĂȚARE (fără distrugere)
         cleaned = clean_text(raw_text)
 
-        st.write("✔ Curățat:", cleaned)
+        #st.write("✔ Curățat:", cleaned)
 
         # ⚠️ IMPORTANT: NU parsăm aici
         st.session_state.ocr_text = cleaned
