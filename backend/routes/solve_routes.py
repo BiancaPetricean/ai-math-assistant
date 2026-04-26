@@ -1,22 +1,18 @@
-<<<<<<< HEAD
+
 from fastapi import APIRouter, UploadFile, File
 from pydantic import BaseModel
 import sympy as sp
 from backend.services.ocr_service import extract_text
-=======
-from fastapi import APIRouter
-from pydantic import BaseModel
-from math_engine.solver import solve_problem
->>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f
+
 
 router = APIRouter()
 
 class MathProblem(BaseModel):
     exercise: str
 
-<<<<<<< HEAD
+
 # =========================
-# SOLVE NORMAL
+# SOLVE NORMAL (FINAL)
 # =========================
 @router.post("/solve")
 def solve(problem: MathProblem):
@@ -26,10 +22,18 @@ def solve(problem: MathProblem):
     try:
         x = sp.symbols('x')
 
-        # =========================
-        # 🔥 TRADUCERI INTELIGENTE
-        # =========================
+        # 🔥 mapping global (IMPORTANT)
+        local_dict = {
+            "sin": sp.sin,
+            "cos": sp.cos,
+            "tan": sp.tan,
+            "pi": sp.pi,
+            "sqrt": sp.sqrt
+        }
 
+        # =========================
+        # ARIA CERCULUI
+        # =========================
         if "aria cercului" in exercise:
             import re
             r = re.findall(r'\d+', exercise)
@@ -38,34 +42,30 @@ def solve(problem: MathProblem):
                 result = sp.pi * r**2
                 return {
                     "result": str(result),
-                    "steps": [f"Aria cercului: π * r² = π * {r}²"]
+                    "steps": [
+                        "Formula: A = π * r²",
+                        f"A = π * {r}²",
+                        f"A = {result}"
+                    ]
                 }
-
-        if "derivata" in exercise or "diff" in exercise:
-            expr = exercise.replace("derivata", "").strip()
-            expr = sp.sympify(expr)
-            result = sp.diff(expr, x)
-            return {"result": str(result), "steps": ["Derivare efectuată"]}
 
         # =========================
         # DERIVATA
         # =========================
-        if "diff" in exercise or "derivata" in exercise:
+        if "derivata" in exercise or "diff" in exercise:
 
             expr_str = exercise.replace("diff", "").replace("derivata", "").strip()
-            expr = sp.sympify(expr_str)
+            expr = sp.sympify(expr_str, locals=local_dict)
 
             derivative = sp.diff(expr, x)
 
-            steps = [
-                f"Funcția este: f(x) = {expr}",
-                "Aplicăm regula derivării",
-                f"Derivata este: {derivative}"
-            ]
-
             return {
                 "result": str(derivative),
-                "steps": steps
+                "steps": [
+                    f"f(x) = {expr}",
+                    "Derivăm funcția",
+                    f"f'(x) = {derivative}"
+                ]
             }
 
         # =========================
@@ -74,35 +74,69 @@ def solve(problem: MathProblem):
         if "=" in exercise:
 
             left, right = exercise.split("=")
-            eq = sp.Eq(sp.sympify(left), sp.sympify(right))
-            sol = sp.solve(eq, x)
 
-            steps = [
-                f"Ecuația este: {exercise}",
-                "Mutăm termenii",
-                "Rezolvăm ecuația",
-                f"Soluția este: {sol}"
-            ]
+            left_expr = sp.sympify(left, locals=local_dict)
+            right_expr = sp.sympify(right, locals=local_dict)
+
+            steps = [f"Ecuatia: {left_expr} = {right_expr}"]
+
+            eq = sp.Eq(left_expr, right_expr)
+
+            simplified = sp.simplify(eq.lhs - eq.rhs)
+
+            steps.append("Aducem totul în stânga")
+            steps.append(f"{simplified} = 0")
+
+            sol = sp.solve(simplified, x)
+
+            steps.append("Rezolvăm ecuația")
+            steps.append(f"Soluția: {sol}")
 
             return {
                 "result": str(sol),
                 "steps": steps
             }
+        # =========================
+        # FUNCȚII (ANALIZĂ REALĂ)
+        # =========================
+        if "x" in exercise:
+
+            expr = sp.sympify(exercise, locals=local_dict)
+
+            steps = []
+            steps.append(f"Funcția este: f(x) = {expr}")
+
+            # simplificare
+            simplified = sp.simplify(expr)
+            steps.append(f"Simplificăm: {simplified}")
+
+            # factorizare (doar dacă e diferită)
+            factored = sp.factor(expr)
+            if factored != expr:
+                steps.append(f"Factorizăm: {factored}")
+
+            # derivata
+            derivative = sp.diff(expr, x)
+            steps.append(f"Derivata: f'(x) = {derivative}")
+
+            return {
+                "result": str(simplified),
+                "steps": steps
+            }
+
 
         # =========================
         # CALCUL SIMPLU
         # =========================
-        expr = sp.sympify(exercise)
-        result = expr.evalf()
-
-        steps = [
-            f"Calculăm expresia: {exercise}",
-            f"Rezultatul este: {result}"
-        ]
+        expr = sp.sympify(exercise, locals=local_dict)
+        result = sp.simplify(expr)
 
         return {
             "result": str(result),
-            "steps": steps
+            "steps": [
+                f"Calculăm expresia: {expr}",
+                f"Rezultat: {result}"
+            ]
         }
 
     except Exception as e:
@@ -116,28 +150,44 @@ def solve(problem: MathProblem):
 @router.post("/solve-image")
 def solve_image(file: UploadFile = File(...)):
 
+    import re
+
     text = extract_text(file.file)
 
     try:
-        expr = sp.sympify(text)
-        result = expr.evalf()
+        cleaned = text.lower()
+
+        cleaned = cleaned.replace("^", "**")
+        cleaned = cleaned.replace("−", "-")
+        cleaned = cleaned.replace(" ", "")
+
+        cleaned = cleaned.replace("x²", "x**2")
+        cleaned = cleaned.replace("x³", "x**3")
+
+        cleaned = re.sub(r'(\d)(x)', r'\1*\2', cleaned)
+        cleaned = re.sub(r'[^0-9xX+\-*/=().]', '', cleaned)
+
+        x = sp.symbols('x')
+
+        if "=" in cleaned:
+            left, right = cleaned.split("=")
+            eq = sp.Eq(sp.sympify(left), sp.sympify(right))
+            result = sp.solve(eq, x)
+        else:
+            expr = sp.sympify(cleaned)
+            result = expr.evalf()
 
         return {
-            "detected_text": str(text),
+            "detected_text": text,
+            "cleaned_text": cleaned,
             "result": str(result)
         }
 
     except Exception as e:
         return {
-            "detected_text": str(text),
+            "detected_text": text,
+            "cleaned_text": cleaned,
             "result": "Nu am putut interpreta",
             "error": str(e)
         }
-=======
-@router.post("/solve")
-def solve(problem: MathProblem):
 
-    result = solve_problem(problem.exercise)
-
-    return result
->>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f

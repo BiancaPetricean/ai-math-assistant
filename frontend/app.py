@@ -6,13 +6,12 @@ import plotly.graph_objects as go
 import plotly.express as px
 import random
 import pandas as pd
-<<<<<<< HEAD
 from PIL import Image
 import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 import cv2 # type: ignore
 import tempfile
-=======
->>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f
+import re
 
 # configurare pagină
 st.set_page_config(
@@ -21,7 +20,6 @@ st.set_page_config(
     layout="wide"
 )
 
-<<<<<<< HEAD
 # STIL PROFESIONAL
 st.markdown("""
 <style>
@@ -59,8 +57,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-=======
->>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f
 # =========================
 # NAVIGARE
 # =========================
@@ -80,12 +76,8 @@ page = st.sidebar.radio(
 if page == "Dashboard":
 
     st.title("📊 Dashboard AI Math Tutor")
-<<<<<<< HEAD
     st.caption("Vizualizare rapidă a activității utilizatorului")
     
-=======
-
->>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f
     st.markdown("Analiza utilizării platformei")
 
     st.markdown("---")
@@ -141,11 +133,7 @@ if page == "Dashboard":
         markers=True
     )
 
-<<<<<<< HEAD
     st.plotly_chart(px.pie(df, names="tip", values="numar", hole=0.4), use_container_width=True)
-=======
-    st.plotly_chart(fig2,use_container_width=True)
->>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f
 
     st.markdown("---")
 
@@ -357,7 +345,6 @@ if page == "Generator exerciții":
 
                 st.write("Răspuns corect:",st.session_state.answer)
 
-
 # =========================
 # SOLVER
 # =========================
@@ -365,25 +352,14 @@ if page == "Generator exerciții":
 if page == "Solver matematic":
 
     st.title("🧠 AI Math Tutor")
-<<<<<<< HEAD
     st.markdown("Platformă pentru rezolvarea exercițiilor matematice")
     st.markdown("---")
 
     # SIDEBAR EXAMENE
-=======
-
-    st.markdown("Platformă pentru rezolvarea exercițiilor matematice")
-
-    st.markdown("---")
-
-    # LINKURI EXAMEN
-
->>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f
     st.sidebar.markdown("---")
     st.sidebar.title("📚 Subiecte examen")
 
     bac_links = [
-<<<<<<< HEAD
         "https://www.pro-matematica.ro/bacalaureat/2023.php",
         "https://www.pro-matematica.ro/bacalaureat/2022.php",
         "https://www.pro-matematica.ro/bacalaureat/2021.php"
@@ -401,57 +377,90 @@ if page == "Solver matematic":
 
     if exam == "BAC":
         if st.sidebar.button("Generează variantă BAC"):
-=======
-    "https://www.pro-matematica.ro/bacalaureat/2023.php",
-    "https://www.pro-matematica.ro/bacalaureat/2022.php",
-    "https://www.pro-matematica.ro/bacalaureat/2021.php"
-    ]
-
-    class8_links = [
-    "https://www.pro-matematica.ro/evaluare-nationala/2023.php",
-    "https://www.pro-matematica.ro/evaluare-nationala/2022.php"
-    ]
-
-    exam = st.sidebar.selectbox(
-    "Alege examenul",
-    ["None","Evaluare Națională","BAC"]
-    )
-
-    if exam == "BAC":
-
-        if st.sidebar.button("Generează variantă BAC"):
-
->>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f
             link = random.choice(bac_links)
             st.sidebar.markdown(f"[Deschide subiect]({link})")
 
     if exam == "Evaluare Națională":
-<<<<<<< HEAD
         if st.sidebar.button("Generează variantă EN"):
             link = random.choice(class8_links)
             st.sidebar.markdown(f"[Deschide subiect]({link})")
+    def preprocess_input(text):
+        
 
-    # LAYOUT
+        text = text.replace(" ", "")
+        text = text.replace("π", "pi")
+
+        # -----------------------
+        # f(x)=
+        # -----------------------
+        text = re.sub(r'f\(x\)=', '', text)
+
+        # -----------------------
+        # INTEGRALE
+        # -----------------------
+        match = re.search(r'∫(.+?)dx', text)
+        if match:
+            expr = match.group(1)
+            expr = expr.replace("^", "**")
+            return f"integrate({expr})"
+
+        # -----------------------
+        # PUTERI
+        # -----------------------
+        text = text.replace("^", "**")
+
+        # -----------------------
+        # MULTIPLICARE (SAFE)
+        # -----------------------
+        text = re.sub(r'(\d)([a-z])', r'\1*\2', text)
+
+        # ❗ IMPORTANT: NU mai folosim ([a-z])\( pentru că strică sin(...)
+        
+        # -----------------------
+        # TRIG (DOAR dacă NU au paranteze)
+        # -----------------------
+        # doar dacă NU există deja paranteză
+        text = re.sub(r'(sin|cos|tan)(pi/[0-9]+)', r'\1(\2)', text)
+
+        # sinx → sin(x) DOAR dacă nu e deja sin(...)
+        text = re.sub(r'(sin|cos|tan)([a-z])(?!\()', r'\1(\2)', text)
+
+        return text
+    def fix_parentheses(expr):
+        open_count = expr.count("(")
+        close_count = expr.count(")")
+
+        if open_count > close_count:
+            expr += ")" * (open_count - close_count)
+
+        elif close_count > open_count:
+            expr = expr[:-(close_count - open_count)]
+
+        return expr
+        # LAYOUT
     col1, col2 = st.columns([2,1])
-
-    # ================= LEFT =================
+# ================= LEFT =================
     with col1:
 
         exercise = st.text_input(
             "✏️ Introdu exercițiul",
-            placeholder="ex: x**2 + 2*x"
+            placeholder="ex: x^2 + 2x"
         )
 
         if st.button("🚀 Rezolvă", use_container_width=True):
 
             try:
+                # 🔥 preprocess o singură dată
+                processed_exercise = preprocess_input(exercise)
+
                 response = requests.post(
                     "http://127.0.0.1:8000/solve",
-                    json={"exercise": exercise}
+                    json={"exercise": processed_exercise}
                 )
 
                 data = response.json()
 
+                # ================= REZULTAT =================
                 st.markdown("### 📊 Rezultat")
 
                 try:
@@ -466,156 +475,118 @@ if page == "Solver matematic":
                         st.write(f"Pasul {i}: {step}")
 
                 # ================= GRAFIC =================
-                if exercise and "x" in exercise and "=" not in exercise:
+                if processed_exercise and "x" in processed_exercise:
 
                     st.markdown("---")
-                    st.subheader("📈 Grafic funcție")
 
                     try:
                         x = sp.symbols('x')
-                        expr = sp.sympify(exercise)
 
-                        f = sp.lambdify(x, expr, "numpy")
+                        # 🔥 ECUAȚIE
+                        if "=" in processed_exercise:
 
-                        xs = np.linspace(-10, 10, 400)
-                        ys = f(xs)
+                            st.subheader("📈 Grafic ecuație")
 
-                        # FIX IMPORTANT
-                        ys = np.array(ys, dtype=float) if isinstance(ys, (list, np.ndarray)) else np.full_like(xs, ys)
+                            left, right = processed_exercise.split("=")
+                            expr = sp.sympify(left) - sp.sympify(right)
 
-                        fig = go.Figure()
+                            f = sp.lambdify(x, expr, "numpy")
 
-                        fig.add_trace(go.Scatter(
-                            x=xs,
-                            y=ys,
-                            mode="lines",
-                            name="f(x)"
-                        ))
+                            xs = np.linspace(-10, 10, 400)
+                            ys = f(xs)
 
+                            fig = go.Figure()
+
+                            fig.add_trace(go.Scatter(
+                                x=xs,
+                                y=ys,
+                                mode="lines",
+                                name="f(x)"
+                            ))
+
+                            # axa X
+                            fig.add_trace(go.Scatter(
+                                x=xs,
+                                y=[0]*len(xs),
+                                mode="lines",
+                                name="y=0",
+                                line=dict(dash="dash")
+                            ))
+
+                        # 🔥 INTEGRALĂ
+                        elif "integrate" in processed_exercise:
+
+                            st.subheader("📈 Grafic integrală")
+
+                            expr_str = processed_exercise.replace("integrate(", "").replace(")", "")
+                            expr = sp.sympify(expr_str)
+
+                            integral = sp.integrate(expr, x)
+
+                            f = sp.lambdify(x, integral, "numpy")
+
+                            xs = np.linspace(-10, 10, 400)
+                            ys = f(xs)
+
+                            fig = go.Figure()
+
+                            fig.add_trace(go.Scatter(
+                                x=xs,
+                                y=ys,
+                                mode="lines",
+                                name="∫f(x)dx"
+                            ))
+
+                        # 🔥 FUNCȚIE NORMALĂ
+                        else:
+
+                            st.subheader("📈 Grafic funcție")
+
+                            expr = sp.sympify(processed_exercise)
+
+                            f = sp.lambdify(x, expr, "numpy")
+
+                            xs = np.linspace(-10, 10, 400)
+                            ys = f(xs)
+
+                            fig = go.Figure()
+
+                            fig.add_trace(go.Scatter(
+                                x=xs,
+                                y=ys,
+                                mode="lines",
+                                name="f(x)"
+                            ))
+
+                        # 🔥 layout comun
                         fig.update_layout(
                             template="plotly_white",
-                            title="Graficul funcției",
                             hovermode="x unified"
                         )
 
                         fig.update_xaxes(showgrid=True)
                         fig.update_yaxes(showgrid=True)
 
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width="stretch")
 
                     except Exception as e:
                         st.error(f"Eroare grafic: {e}")
 
             except Exception as e:
                 st.error(f"Eroare server: {e}")
-
-# ================= RIGHT =================
+    # ================= RIGHT =================
     with col2:
 
         st.subheader("💡 Exemple rapide")
-        st.code("2+3")
-        st.code("x**2")
-        st.code("diff(x**2)")
-=======
 
-        if st.sidebar.button("Generează variantă EN"):
+        if st.button("2+3"):
+            st.session_state.example = "2+3"
 
-            link = random.choice(class8_links)
-            st.sidebar.markdown(f"[Deschide subiect]({link})")
+        if st.button("x**2"):
+            st.session_state.example = "x**2"
 
-    # INPUT
-
-    exercise = st.text_input("✏️ Introdu exercițiul matematic")
-
-    if st.button("Rezolvă exercițiu"):
-
-        try:
-
-            response = requests.post(
-                "http://127.0.0.1:8000/solve",
-                json={"exercise": exercise}
-            )
-
-            data = response.json()
-
-            st.subheader("📊 Rezultat")
-
-            try:
-                st.latex(data["result"])
-            except:
-                st.write(data["result"])
-
-            if "steps" in data:
-
-                st.subheader("📚 Pași rezolvare")
-
-                for step in data["steps"]:
-
-                    if isinstance(step,dict):
-
-                        st.write(step["text"])
-                        st.latex(step["math"])
-
-                    else:
-                        st.write(step)
-
-            # ANALIZA FUNCTIE
-
-            if "x" in exercise and "=" not in exercise:
-
-                st.markdown("---")
-                st.subheader("📈 Analiza funcției")
-
-                x = sp.symbols('x')
-                expr = sp.sympify(exercise)
-
-                derivative = sp.diff(expr,x)
-
-                st.write("Derivata:")
-                st.latex(sp.latex(derivative))
-
-                critical_points = sp.solve(derivative,x)
-                roots = sp.solve(expr,x)
-
-                st.write("Puncte critice:",critical_points)
-                st.write("Intersecții Ox:",roots)
-
-                f = sp.lambdify(x,expr,"numpy")
-
-                xs = np.linspace(-10,10,400)
-                ys = f(xs)
-
-                fig = go.Figure()
-
-                fig.add_trace(go.Scatter(
-                    x=xs,
-                    y=ys,
-                    mode="lines",
-                    line=dict(width=3),
-                    name="f(x)"
-                ))
-
-                for r in roots:
-                    fig.add_trace(go.Scatter(
-                        x=[r],
-                        y=[0],
-                        mode="markers",
-                        marker=dict(size=10,color="green"),
-                        name="rădăcină"
-                    ))
-
-                fig.update_layout(
-                    template="plotly_white",
-                    title="Graficul funcției"
-                )
-
-                st.plotly_chart(fig,use_container_width=True)
-
-        except Exception as e:
-
-            st.error("Nu se poate conecta la server")
-
->>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f
+        if st.button("diff(x**2)"):
+            st.session_state.example = "diff(x**2)"
     # =========================
     # SISTEME ECUATII
     # =========================
@@ -645,117 +616,264 @@ if page == "Solver matematic":
         except:
 
             st.error("Nu pot rezolva sistemul")
-<<<<<<< HEAD
             
-     # =========================
-    # OCR DIN IMAGINE
-    # =========================
+# =========================
+# INIT SESSION STATE
+# =========================
+if "ocr_text" not in st.session_state:
+    st.session_state.ocr_text = ""
 
-    st.markdown("---")
-    st.subheader("📸 Rezolvă exercițiu din imagine")
-    st.info("📱 Funcționează și pe telefon")
+if "result" not in st.session_state:
+    st.session_state.result = ""
 
-    uploaded_file = st.file_uploader(
-        "Încarcă o imagine (poză cu exercițiul)",
-        type=["png", "jpg", "jpeg"]
+if "steps" not in st.session_state:
+    st.session_state.steps = []
+
+# =========================
+# FUNCȚII SMART
+# =========================
+def fix_ocr_errors(text):
+    text = text.lower()
+
+    text = text.replace("\n", "")
+    text = text.replace(" ", "")
+
+    # -----------------------
+    # RADICAL
+    # -----------------------
+    text = text.replace("√", "sqrt")
+    text = text.replace("v", "sqrt")
+    text = re.sub(r'sqrt([0-9a-z\-\+\*/]+)', r'sqrt(\1)', text)
+    text = re.sub(r'sqrt(\d+)', r'sqrt(\1)', text)
+    
+    # -----------------------
+    # PUTERI (SAFE VERSION)
+    # -----------------------
+
+    # DOAR unicode
+    text = text.replace("²", "**2")
+    text = text.replace("³", "**3")
+
+    # DOAR dacă există ^
+    text = text.replace("^", "**")
+
+    # -----------------------
+    # MULTIPLICARE
+    # -----------------------
+    text = re.sub(r'(\d)(x)', r'\1*\2', text)
+    text = re.sub(r'(x)(\d)', r'\1*\2', text)
+
+    # -----------------------
+    # INTEGRALĂ
+    # -----------------------
+    text = text.replace("∫", "integrate")
+
+    # -----------------------
+    # PI
+    # -----------------------
+    text = text.replace("π", "pi")
+
+    # -----------------------
+    # FRACTII
+    # -----------------------
+    text = text.replace(":", "/")
+
+    # -----------------------
+    # VIRGULĂ
+    # -----------------------
+    text = text.replace(",", ".")
+
+    return text
+
+def smart_math_parser(text):
+    text = fix_ocr_errors(text)
+
+    text = text.replace("−", "-")
+
+    text = re.sub(r'[^0-9a-z+\-*/=().]', '', text)
+
+    if "d/dx" in text:
+        expr = text.split("d/dx")[-1]
+        return f"diff({expr})"
+
+    if "integrate" in text:
+        expr = text.replace("integrate", "")
+        expr = expr.replace("dx", "")
+        return f"integrate({expr})"
+
+    return text
+
+def clean_text(text):
+    text = text.replace("\n", "")
+    text = text.replace(" ", "")
+
+    text = re.sub(r'[^0-9a-zA-Z+\-*/=().√²³π]', '', text)
+
+    return text
+
+# =========================
+# UI
+# =========================
+st.markdown("---")
+st.subheader("📷 Fotografiază sau încarcă exercițiul")
+
+uploaded_file = st.file_uploader(
+    "📁 Încarcă imagine",
+    type=["png", "jpg", "jpeg"],
+    key="upload_final"
+)
+
+img_file = st.camera_input(
+    "📷 Fă o poză",
+    key="camera_final"
+)
+
+image_source = uploaded_file if uploaded_file is not None else img_file
+
+# =========================
+# CROP + OCR
+# =========================
+if image_source is not None:
+
+    image = Image.open(image_source)
+    img_np = np.array(image)
+
+    st.image(image, caption="Imagine selectată", width="stretch")
+
+    st.markdown("### ✂️ Selectează zona exercițiului")
+
+    h, w = img_np.shape[:2]
+
+    left = st.slider("⬅️ Stânga", 0, w, 0)
+    right = st.slider("➡️ Dreapta", 0, w, w)
+
+    top = st.slider("⬆️ Sus", 0, h, 0)
+    bottom = st.slider("⬇️ Jos", 0, h, h)
+
+    left, right = sorted([left, right])
+    top, bottom = sorted([top, bottom])
+
+    if right - left > 10 and bottom - top > 10:
+        preview = img_np[top:bottom, left:right]
+        st.image(preview, caption="Preview selecție", width="stretch")
+    else:
+        st.warning("Selectează o zonă validă")
+
+# =========================
+# OCR (VARIANTA STABILĂ FINALĂ)
+# =========================
+if st.button("🔍 Procesează exercițiul"):
+
+    if right - left < 10 or bottom - top < 10:
+        st.error("Zona prea mică")
+    else:
+
+        cropped = img_np[top:bottom, left:right]
+
+        # conversie sigură
+        if len(cropped.shape) == 3:
+            img = cv2.cvtColor(cropped, cv2.COLOR_RGB2BGR)
+        else:
+            img = cropped.copy()
+
+        # 🔥 PREPROCESSING MINIM (cheia!)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (3,3), 0)
+
+        _, thresh = cv2.threshold(
+            gray, 0, 255,
+            cv2.THRESH_BINARY + cv2.THRESH_OTSU
+        )
+
+        st.image(thresh, caption="Procesată", width="stretch")
+
+        # 🔥 OCR CU WHITELIST ECHILIBRAT
+        raw_text = pytesseract.image_to_string(
+            thresh,
+            config='--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789abcdefghijklmnopqrstuvwxyz+-=*/().√^πv'
+        )
+
+        st.write("RAW:", raw_text)
+
+        # 🔥 CURĂȚARE (fără distrugere)
+        cleaned = clean_text(raw_text)
+
+        st.write("✔ Curățat:", cleaned)
+
+        # ⚠️ IMPORTANT: NU parsăm aici
+        st.session_state.ocr_text = cleaned
+        st.session_state.result = ""
+        st.session_state.steps = []
+# =========================
+# EDITARE + REZOLVARE
+# =========================
+if st.session_state.ocr_text:
+
+    st.markdown("### ✏️ Modifică exercițiul (dacă e nevoie)")
+
+    user_input = st.text_input(
+        "Exercițiu",
+        value=st.session_state.ocr_text
     )
 
-    if uploaded_file is not None:
+    if st.button("🧠 Rezolvă exercițiul"):
 
-        st.image(uploaded_file, caption="Imagine încărcată", use_container_width=True)
+        try:
+            parsed = smart_math_parser(user_input)
 
-        if st.button("📸 Procesează imagine", key="ocr_btn"):
+            st.write("📐 Interpretare:", parsed)
 
-            try:
-                response = requests.post(
-                    "http://127.0.0.1:8000/solve-image",
-                    files={"file": ("image.png", uploaded_file, "image/png")}
-                )
+            response = requests.post(
+                "http://127.0.0.1:8000/solve",
+                json={"exercise": parsed}
+            )
 
-                data = response.json()
+            data = response.json()
 
-                st.subheader("📄 Text detectat:")
-                st.write(data["detected_text"])
+            if "result" in data:
+                st.session_state.result = data["result"]
+                st.session_state.steps = data.get("steps", [])
+            else:
+                st.error("Eroare backend")
 
-                # trimite direct la solver
-                if st.button("Rezolvă automat", key="auto_btn"):
+        except Exception as e:
+            st.error("Eroare rezolvare")
+            st.caption(str(e))
 
-                    response2 = requests.post(
-                        "http://127.0.0.1:8000/solve",
-                        json={"exercise": data["detected_text"]}
-                    )
+# =========================
+# REZULTAT
+# =========================
+if st.session_state.result:
 
-                    data2 = response2.json()
+    st.subheader("📊 Rezultat")
 
-                    st.subheader("📊 Rezultat")
+    try:
+        st.latex(st.session_state.result)
+    except:
+        st.write(st.session_state.result)
 
-                    try:
-                        st.latex(data2["result"])
-                    except:
-                        st.write(data2["result"])
+    if st.session_state.steps:
 
-            except:
-                st.error("Eroare la procesarea imaginii")
+        st.markdown("---")
+        st.subheader("📚 Pași de rezolvare")
 
-
+        for i, step in enumerate(st.session_state.steps, 1):
+            with st.expander(f"Pasul {i}"):
+                st.write(step)
+    # EXEMPLE
+    # =========================
 
 st.markdown("---")
-st.subheader("📷 Cameră live (poză direct)")
+st.subheader("💡 Exemple")
 
-img_file = st.camera_input("Fă o poză")
+col1,col2 = st.columns(2)
 
-if img_file is not None:
-
-    image = Image.open(img_file)
-    st.image(image, caption="Poză capturată")
-
-    if st.button("🔍 Detectează exercițiu"):
-
-        gray = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2GRAY)
-        text = pytesseract.image_to_string(gray)
-
-        st.subheader("📄 Text detectat:")
-        st.code(text)
-
-        if st.button("🧠 Rezolvă automat"):
-
-            try:
-                response = requests.post(
-                    "http://127.0.0.1:8000/solve",
-                    json={"exercise": text}
-                )
-
-                data = response.json()
-
-                st.subheader("📊 Rezultat")
-
-                try:
-                    st.latex(data["result"])
-                except:
-                    st.write(data["result"])
-
-            except Exception as e:
-                st.error("🚫 Eroare server")
-                st.caption(str(e))
-    # =========================
-    # EXEMPLE
-    # =========================
-=======
-
-    # EXEMPLE
->>>>>>> 223be60aa610c8ea6b88887e32107010eb9e386f
-
-    st.markdown("---")
-    st.subheader("💡 Exemple")
-
-    col1,col2 = st.columns(2)
-
-    with col1:
+with col1:
         st.code("2+3")
         st.code("2*x + 5 = 15")
         st.code("diff(x**2)")
 
-    with col2:
+with col2:
         st.code("integrate(x**2)")
         st.code("sin(pi/2)")
         st.code("aria cercului raza 5")
