@@ -1,80 +1,177 @@
-# AI Math Assistant
+# 🧠 AI Math Assistant
 
-AI Math Assistant este o aplicație pentru rezolvarea exercițiilor matematice. Utilizatorul introduce exercițiul în interfață, iar aplicația îl procesează și afișează rezultatul împreună cu pașii de rezolvare.
+AI Math Assistant este o aplicație pentru rezolvarea automată a exercițiilor matematice. Utilizatorul poate introduce exerciții manual sau prin imagine, iar aplicația procesează datele și afișează rezultatul împreună cu pașii de rezolvare.
 
-Proiectul este realizat în Python și este organizat modular, astfel încât componentele pentru interfață, backend și logica matematică să fie separate.
+Proiectul este realizat în Python și este organizat modular, separând clar interfața, backend-ul și logica matematică.
 
-## Funcționalități
+---
 
-Aplicația poate rezolva exerciții matematice precum:
-- expresii matematice simple
-- ecuații
-- derivate
-- integrale
+## 🚀 Funcționalități
 
-Rezultatul este afișat împreună cu explicații și pași intermediari.
+Aplicația poate rezolva:
 
-## Tehnologii utilizate
+* ✔ expresii matematice simple
+* ✔ ecuații algebrice
+* ✔ derivate
+* ✔ integrale
+* ✔ funcții matematice (analiză și grafic)
+* ✔ exerciții extrase din imagini (OCR)
 
-- **Python** – limbajul principal al aplicației
-- **FastAPI** – pentru backend și API
-- **Streamlit** – pentru interfața utilizatorului
-- **SymPy** – pentru procesarea matematică
-- **Git și GitHub** – pentru versionare și colaborare în echipă
+Rezultatele sunt afișate împreună cu explicații și pași intermediari.
 
-## Structura proiectului
-ai-math-assistant
-├── backend
-│   └── routes
-├── database
-├── frontend
-├── math_engine
-├── services
-├── utils
+---
+
+## ⚙️ Tehnologii utilizate
+
+* **Python** – limbaj principal
+* **FastAPI** – backend și API
+* **Streamlit** – interfața utilizator
+* **SymPy** – procesare matematică simbolică
+* **OpenCV & Tesseract OCR** – procesare imagine și recunoaștere text
+* **Plotly** – vizualizare grafică
+* **Git & GitHub** – versionare și colaborare
+
+---
+
+## 📁 Structura proiectului
+
+```
+ai-math-assistant/
+├── backend/        # API și logică server
+│   └── routes/     # rute aplicație
+├── frontend/       # interfața Streamlit
+├── math_engine/    # logica matematică
+├── services/       # servicii auxiliare (OCR etc.)
+├── utils/          # funcții ajutătoare
+├── database/       # componente pentru date
 ├── requirements.txt
 └── README.md
-##Descrierea componentelor
-backend – gestionează cererile aplicației și logica API
-backend/routes – conține rutele aplicației
-database – conține componentele legate de gestionarea datelor
-frontend – interfața utilizator
-math_engine – logica principală pentru rezolvarea exercițiilor matematice
-services – servicii auxiliare utilizate în aplicație
-utils – funcții ajutătoare
+```
 
-##Instalare
+---
+
+## 🧩 Descrierea componentelor
+
+* **backend** – gestionează cererile și logica API
+* **frontend** – interfața utilizatorului
+* **math_engine** – rezolvarea exercițiilor matematice
+* **services** – servicii auxiliare (ex: OCR)
+* **utils** – funcții ajutătoare
+* **database** – gestionarea datelor (dacă este cazul)
+
+---
+
+## 🛠️ Instalare
+
 Clonați repository-ul:
+
+```
 git clone https://github.com/BiancaPetricean/ai-math-assistant.git
-Intrați în folderul proiectului:
+```
+
+Intrați în folder:
+
+```
 cd ai-math-assistant
+```
+
 Creați un mediu virtual:
+
+```
 python -m venv venv
+```
+
 Activați mediul virtual:
-Windows
+
+**Windows:**
+
+```
 venv\Scripts\activate
+```
+
 Instalați dependențele:
+
+```
 pip install -r requirements.txt
-Rulare
-Pornirea backend-ului:
+```
+
+---
+
+## ▶️ Rulare
+
+Porniți backend-ul:
+
+```
 uvicorn backend.main:app --reload
-Pornirea interfeței:
+```
+
+Porniți interfața:
+
+```
 streamlit run frontend/app.py
-După pornire, aplicația poate fi accesată din browser.
+```
 
-##Exemple de exerciții
-Expresie
-√(16)
-Ecuație
-x^2=4
-Derivată
-d/dx(x^2+3*x)
-Integrală
-∫(x^2)dx
+Aplicația va fi disponibilă în browser.
 
-##Gestionarea proiectului
-Proiectul este gestionat folosind Git și GitHub. Pentru dezvoltare a fost folosit un workflow bazat pe branch-uri:
-main – versiunea stabilă
-dev – integrarea modificărilor
-feature-* – dezvoltarea funcționalităților separate
-Integrarea codului se face prin Pull Request-uri.
+---
 
+## 🧪 Exemple de exerciții
+
+**Expresie:**
+
+```
+sqrt(16)
+```
+
+**Ecuație:**
+
+```
+x^2 = 4
+```
+
+**Derivată:**
+
+```
+diff(x^2 + 3*x)
+```
+
+**Integrală:**
+
+```
+∫ x^2 dx
+```
+
+**Trigonometrie:**
+
+```
+sin(pi/2)
+```
+
+---
+
+## 🔄 Workflow Git
+
+Proiectul a fost dezvoltat folosind Git și GitHub, cu workflow pe branch-uri:
+
+* `main` – versiunea stabilă
+* `feature-backend` – dezvoltare backend
+* `feature-frontend` – dezvoltare interfață
+* `feature-ai` – logică AI / matematică
+
+Integrarea modificărilor s-a realizat prin Pull Request-uri.
+
+---
+
+## 📌 Observații
+
+* Aplicația suportă input flexibil (manual + OCR)
+* Sunt implementate mecanisme de corectare a input-ului (preprocesare)
+* Rezultatele sunt afișate atât simbolic, cât și numeric
+
+---
+
+## 👩‍💻 Autor
+
+Proiect realizat în cadrul unui proiect de echipă (Master).
+
+---
